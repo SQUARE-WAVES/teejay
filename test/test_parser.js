@@ -1,7 +1,7 @@
 const assert = require("assert");
 
 suite("test the parser", function () {
-  const parse = require("../lib/neo_parser.js").parse;
+  const parse = require("../lib/parser.js").parse;
 
   test("parser generates 1 output per tag", function (done) {
     const input = `[<tag_one>"dogs","this is a distraction",<tag_two>true,<tag_three>"hogs"]`
