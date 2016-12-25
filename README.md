@@ -74,7 +74,7 @@ const bad_input = `<zip>[<file>'./dogs/cats/catlist.xml'`;
 
 parse_tj(input,tag_function, (err,results)=> {
 	//you won't have an error, and your results will be:
-	//["a good boy","some worthless beast","this will just be a string","some worthless beast",15,true,false,"some other random json value"];
+	//["a good boy","some worthless beast","this will just be a string","some worthless beast",true,false,"some other random json value"];
 })
 
 parse_tj(bad_input,tag_function, (err,results) => {
