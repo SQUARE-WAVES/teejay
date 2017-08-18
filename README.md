@@ -139,3 +139,17 @@ I'm pretty sure you could but please don't. There are already better programming
 
 maybe, if people find this and like it.
 Right now there is a peg.js style grammar in the "grammar" folder, and a little js file that will build a pegjs parser for it. However that parer will not work for the main language without hacking it up into a generator to work with async functions. it might be useful for syntax highlighters or something though.
+
+# NOW WITH PROMISES
+now that node has native promises and async/await I've upgraded TJ to support them you can now call
+
+```
+const promise_tj = require("teejay").promise,
+
+const tag_function = async function(tag,val){
+	return "I DONT CARE ABOUT TAGS BUT THIS WILL WORK!"
+}
+
+promise_tj(some_file,tag_function).then(tjres => do_something_with_result(tjres))
+
+```
