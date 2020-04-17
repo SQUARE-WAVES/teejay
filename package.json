@@ -1,6 +1,6 @@
 {
   "name": "teejay",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "like json but with tags",
   "main": "main.js",
   "dependencies": {
