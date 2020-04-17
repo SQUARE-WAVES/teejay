@@ -161,7 +161,7 @@ suite("test the runner tasks", function () {
       assert.equal(tag_function, tagfunk, "the tag function should pass through");
       done();
     })
-  })
+  });
 
   test("build_tagval promise error", (done) => {
     const exptag = "corn";
@@ -180,5 +180,47 @@ suite("test the runner tasks", function () {
       assert.equal(err, reterr, "the tag functions error should be returned");
       done();
     })
-  })
+  });
+
+  test("build_tagval promise, function returns a non promise no error", (done) => {
+    const exptag = "corn";
+    const expval = "porp";
+    const retval = "corn porp";
+
+    const tagfunk = (tag, val) => {
+      assert.equal(tag, exptag, "the correct tag should get fed in");
+      assert.equal(val, expval, "the correct value should get fed in");
+      return retval;
+    }
+
+    const gen = {}
+
+    tasks.promise_tasks.build_tagval(exptag, expval, gen, tagfunk, (err, state, result, resgen, tag_function) => {
+      assert.equal(err, null, "no errors here");
+      assert.equal(state, "get_next_results", "the correct state should be chosen");
+      assert.equal(result, retval, "the result from the tag function should be gotten");
+      assert.equal(resgen, gen, "the generator should pass through");
+      assert.equal(tag_function, tagfunk, "the tag function should pass through");
+      done();
+    })
+  });
+
+  test("build_tagval promise,function returns a non promise error", (done) => {
+    const exptag = "corn";
+    const expval = "porp";
+    const reterr = "corn porp";
+
+    const tagfunk = (tag, val, cb) => {
+      assert.equal(tag, exptag, "the correct tag should get fed in");
+      assert.equal(val, expval, "the correct value should get fed in");
+      throw(reterr);
+    }
+
+    const gen = {}
+
+    tasks.promise_tasks.build_tagval(exptag, expval, gen, tagfunk, (err, state, result, resgen, tag_function) => {
+      assert.equal(err, reterr, "the tag functions error should be returned");
+      done();
+    })
+  });
 });

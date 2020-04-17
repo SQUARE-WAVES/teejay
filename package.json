@@ -7,6 +7,7 @@
     "async-fsm": "^1.0.3"
   },
   "devDependencies": {
+    "mocha": "^7.1.1",
     "pegjs": "^0.9.0"
   },
   "scripts": {
