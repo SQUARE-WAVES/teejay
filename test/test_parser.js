@@ -96,4 +96,54 @@ suite("test the parser", function () {
       done();
     }
   })
+
+  test("parser gives you a stack of context tags in a nested tag",function (done) {
+    const input = `<root>{"1":<a><b>"val1","2":"a non tag"}`
+
+    const gen = parse(input);
+
+    const v1 = gen.next("");
+    const v2 = gen.next("b-tag");
+    const v3 = gen.next("ab-tag");
+    const v4 = gen.next("root-tag");
+
+    const ev1 = {
+      "value": {
+        "tag": "b",
+        "val": "val1",
+        "tag_stack":["root","a"]
+      },
+      "done": false
+    };
+
+    const ev2 = {
+      "value": {
+        "tag": "a",
+        "val": "b-tag",
+        "tag_stack":["root"]
+      },
+      "done": false
+    };
+
+    const ev3 = {
+      "value": {
+        "tag": "root",
+        "val": {"1":"ab-tag","2":"a non tag"}
+        //no stack as there is no context here
+      },
+      "done": false
+    };
+
+    //remember the non tagged values should be accounted for correctly
+    const ev4 = {
+      "value": "root-tag",
+      "done": true
+    };
+
+    assert.deepEqual(v1, ev1, "the 1st value should be correct");
+    assert.deepEqual(v2, ev2, "the 2nd value should be correct");
+    assert.deepEqual(v3, ev3, "the 3rd value should be correct");
+    assert.deepEqual(v4, ev4, "the final value should be correct");
+    done();
+  })
 })

@@ -77,20 +77,23 @@ suite("test the runner tasks", function () {
     const tf = {};
     const tag = "something";
     const val = "an value";
+    const ts = []
 
     const results = {
       "value": {
         "tag": tag,
-        "val": val
+        "val": val,
+        "tag_stack":ts
       },
       "done": false
     };
 
-    tasks.deal_with_results(results, gen, tf, (err, state, restag, resval, resgen, tag_func) => {
+    tasks.deal_with_results(results, gen, tf, (err, state, restag, resval,resstack, resgen, tag_func) => {
       assert.equal(err, null, "no errors here");
       assert.equal(state, "build_tagval", "the correct state should be chosen");
       assert.equal(restag, tag, "the tag should be passed through");
       assert.equal(resval, val, "the value should be passed through");
+      assert.equal(resstack, ts, "the stack should be passed through");
       assert.equal(resgen, gen, "the generator should be passed through");
       assert.equal(tf, tag_func, "the tag function should be passed through");
       done();
@@ -100,17 +103,19 @@ suite("test the runner tasks", function () {
   test("build_tagval no error", (done) => {
     const exptag = "corn";
     const expval = "porp";
+    const expstack = ["fish"];
     const retval = "corn porp";
 
-    const tagfunk = (tag, val, cb) => {
+    const tagfunk = (tag, val,stack, cb) => {
       assert.equal(tag, exptag, "the correct tag should get fed in");
+      assert.deepEqual(stack, expstack, "the correct tag_stack should get fed in");
       assert.equal(val, expval, "the correct value should get fed in");
       cb(null, retval);
     }
 
     const gen = {}
 
-    tasks.build_tagval(exptag, expval, gen, tagfunk, (err, state, result, resgen, tag_function) => {
+    tasks.build_tagval(exptag, expval, expstack, gen, tagfunk, (err, state, result, resgen, tag_function) => {
       assert.equal(err, null, "no errors here");
       assert.equal(state, "get_next_results", "the correct state should be chosen");
       assert.equal(result, retval, "the result from the tag function should be gotten");
@@ -123,17 +128,20 @@ suite("test the runner tasks", function () {
   test("build_tagval error", (done) => {
     const exptag = "corn";
     const expval = "porp";
+    const expstack = ["fish"];
     const reterr = "corn porp";
 
-    const tagfunk = (tag, val, cb) => {
+    const tagfunk = (tag, val, stack,cb) => {
       assert.equal(tag, exptag, "the correct tag should get fed in");
       assert.equal(val, expval, "the correct value should get fed in");
+      assert.equal(stack, expstack, "the correct stack should get fed in");
+
       cb(reterr, null);
     }
 
     const gen = {}
 
-    tasks.build_tagval(exptag, expval, gen, tagfunk, (err, state, result, resgen, tag_function) => {
+    tasks.build_tagval(exptag, expval, expstack,gen, tagfunk, (err, state, result, resgen, tag_function) => {
       assert.equal(err, reterr, "the tag functions error should be returned");
 
       done();
