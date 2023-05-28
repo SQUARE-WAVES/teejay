@@ -27,7 +27,6 @@ suite("test the builder", () => {
     //this is a lil complicated cause its testing a lot of things
     let tstate = 0;
     const tag_function = async (tag,val) => {
-      console.log(tag,val);
       switch(tstate) {
         case 0:
           assert.equal("tag",tag);

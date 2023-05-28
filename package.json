@@ -4,7 +4,7 @@
   "description": "like json but with tags",
   "main": "main.js",
   "devDependencies": {
-    "mocha": "^8.0.1",
+    "mocha": "^10.2.0",
     "pegjs": "^0.9.0"
   },
   "scripts": {
