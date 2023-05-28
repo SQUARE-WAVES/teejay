@@ -26,11 +26,12 @@ suite("test the builder", () => {
 
     //this is a lil complicated cause its testing a lot of things
     let tstate = 0;
-    const tag_function = async (tag,val) => {
+    const tag_function = async (tag,val,stack) => {
       switch(tstate) {
         case 0:
           assert.equal("tag",tag);
           assert.equal(true,val);
+          assert.deepEqual([],stack,"there are no tags in the background")
           tstate = 1;
           return "tag one";
         break;
@@ -38,6 +39,7 @@ suite("test the builder", () => {
         case 1:
           assert.equal("tag3",tag);
           assert.equal("snakes",val);
+          assert.deepEqual(["tag2"],stack,"the tag stack should have some context!");
           tstate = 2;
           return "tag two";
         break;
@@ -45,6 +47,7 @@ suite("test the builder", () => {
         case 2:
           assert.equal("tag2",tag)
           assert.deepEqual([null,54,"tag two",{"z":"b"}],val);
+          assert.deepEqual([],stack,"the tag stack should have dropped tag2");
           return "tag three";
         break;
 
