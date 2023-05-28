@@ -8,4 +8,4 @@ const out = peg.buildParser(file, {
   "output": "source"
 });
 
-console.log(out);
+console.log(`module.exports = ${out}`);

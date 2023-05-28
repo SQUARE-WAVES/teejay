@@ -1,22 +1,10 @@
-{
-  function tag_function(o) {
-    if(o.val){
-          return "#TAGVAL: "+ o.val
-    }
-    else{
-    	return "#solo " + o.tag
-    }
-  }
-}
-
-
 text = ws v:tj_val ws {return v}
 
-tj_val = tv:tagval {return tag_function(tv)} / t:tag {return tag_function(t)} / value
+tj_val = tv:tagval {return ["tagval",tv.tag,tv.val]} / t:tag {return ["tag",t.tag]} / v:value {return ["val",v]} / a:array {return ["array",a]} / o:object {return ["object",o]}
 
 tagval = t:tag v:tj_val {return {tag:t.tag,val:v}}
 
-tag = begin_tag chars:[a-z0-9\_]+ end_tag {return {tag:chars.join("")}}
+tag = begin_tag chars:[a-z0-9\_] + end_tag {return {tag:chars.join("")}}
 begin_tag = "<"
 end_tag = ">"
 
@@ -29,7 +17,7 @@ value_separator = ws "," ws
 
 ws "whitespace" = [ \t\n\r]*
 
-value = string / number / false / true / null / array / object
+value = string / number / false / true / null
 
 false = "false" { return false; }
 null  = "null"  { return null;  }
@@ -41,23 +29,15 @@ object
       head:member
       tail:(value_separator m:member { return m; })*
       {
-        var result = {}, i;
-
-        result[head.name] = head.value;
-
-        for (i = 0; i < tail.length; i++) {
-          result[tail[i].name] = tail[i].value;
-        }
-
-        return result;
+        return [head,...tail]; 
       }
     )?
     end_object
-    { return members !== null ? members: {}; }
+    { return members !== null ? members: []; }
 
 member
   = name:string name_separator value:tj_val {
-      return { name: name, value: value };
+      return [ name, value];
     }
 
 
