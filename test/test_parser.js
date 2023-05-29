@@ -3,147 +3,69 @@ const assert = require("assert");
 suite("test the parser", function () {
   const parse = require("../lib/parser.js").parse;
 
-  test("parser generates 1 output per tag", function (done) {
-    const input = `[<tag_one>"dogs","this is a distraction",<tag_two>true,<tag_three>"hogs"]`
+  test("tag",(done) => {
+    const text = `<tagffff>`;
+    const tree = parse(text);
 
-    const gen = parse(input);
-
-    const v1 = gen.next(1);
-    const v2 = gen.next(2);
-    const v3 = gen.next(3);
-    const v4 = gen.next(4);
-
-    const ev1 = {
-      "value": {
-        "tag": "tag_one",
-        "val": "dogs"
-      },
-      "done": false
-    };
-
-    const ev2 = {
-      "value": {
-        "tag": "tag_two",
-        "val": true
-      },
-      "done": false
-    };
-
-    const ev3 = {
-      "value": {
-        "tag": "tag_three",
-        "val": "hogs"
-      },
-      "done": false
-    };
-
-    //remember the non tagged values should be accounted for correctly
-    const ev4 = {
-      "value": [2, "this is a distraction", 3, 4],
-      "done": true
-    };
-
-    assert.deepEqual(v1, ev1, "the 1st value should be correct");
-    assert.deepEqual(v2, ev2, "the 2nd value should be correct");
-    assert.deepEqual(v3, ev3, "the 3rd value should be correct");
-    assert.deepEqual(v4, ev4, "the final value should be correct");
+    assert.deepEqual(["tag","tagffff"],tree);
     done();
   });
 
-  test("parser generates tags in the correct order", function (done) {
-    //so the order is by "lexical stack" basically tags get pushed on a stack
-    //when they are read, then any tags in the following value get pushed onto
-    //the stack until a value with no tags is found, at which point the parser
-    //spits out that tag and value pair. EG in the input
+  test("values",(done) => {
+    const txt1 = `542`;
+    const tree1 = parse(txt1);
 
-    const input = `
-      {
-        "dogs":<third><second><first>"catfish",
-        "cats":<fourth>"dogfish",
-        "zilbor":<seventh>[<fifth>"gobliz","this is a distraction",<sixth>"robliz"]
-      }
-    `
+    const txt2 = `"sneed"`;
+    const tree2 = parse(txt2);
 
-    //the expected order would be
-    const expected_order = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh"];
+    const txt3 = `false`;
+    const tree3 = parse(txt3);
+  
+    const txt4 = `null`;
+    const tree4 = parse(txt4);
 
-    const gen = parse(input);
-    const order = [];
-
-    order.push(gen.next().value.tag);
-    order.push(gen.next().value.tag);
-    order.push(gen.next().value.tag);
-    order.push(gen.next().value.tag);
-    order.push(gen.next().value.tag);
-    order.push(gen.next().value.tag);
-    order.push(gen.next().value.tag);
-
-    assert.deepEqual(order, expected_order, "the tags should come back in the correct order")
+    assert.deepEqual(["val",542],tree1);
+    assert.deepEqual(["val","sneed"],tree2);
+    assert.deepEqual(["val",false],tree3);
+    assert.deepEqual(["val",null],tree4);
     done();
   });
 
-  test("parser throws when it hits an exception", function (done) {
-    const input = `[<tag_one>"dogs",<tag_two>true",<tag_three>"hogs"[`
+  test("array",(done) => {
 
-    const gen = parse(input);
+    const text = `[true,<tagz>"tag",null,[]]`;
+    const tree = parse(text);
 
-    const v1 = gen.next(1);
-    try {
-      const v2 = gen.next(4);
-      assert(false, "an exception should have been thrown")
-    }
-    catch (exc) {
-      done();
-    }
-  })
+    const [mode,vals] = tree;
 
-  test("parser gives you a stack of context tags in a nested tag",function (done) {
-    const input = `<root>{"1":<a><b>"val1","2":"a non tag"}`
+    assert.equal("array",mode);
 
-    const gen = parse(input);
-
-    const v1 = gen.next("");
-    const v2 = gen.next("b-tag");
-    const v3 = gen.next("ab-tag");
-    const v4 = gen.next("root-tag");
-
-    const ev1 = {
-      "value": {
-        "tag": "b",
-        "val": "val1",
-        "tag_stack":["root","a"]
-      },
-      "done": false
-    };
-
-    const ev2 = {
-      "value": {
-        "tag": "a",
-        "val": "b-tag",
-        "tag_stack":["root"]
-      },
-      "done": false
-    };
-
-    const ev3 = {
-      "value": {
-        "tag": "root",
-        "val": {"1":"ab-tag","2":"a non tag"}
-        //no stack as there is no context here
-      },
-      "done": false
-    };
-
-    //remember the non tagged values should be accounted for correctly
-    const ev4 = {
-      "value": "root-tag",
-      "done": true
-    };
-
-    assert.deepEqual(v1, ev1, "the 1st value should be correct");
-    assert.deepEqual(v2, ev2, "the 2nd value should be correct");
-    assert.deepEqual(v3, ev3, "the 3rd value should be correct");
-    assert.deepEqual(v4, ev4, "the final value should be correct");
+    assert.deepEqual(["val",true],vals[0]);
+    assert.deepEqual(["tagval","tagz",["val","tag"]],vals[1]);
+    assert.deepEqual(["val",null],vals[2]);
+    assert.deepEqual(["array",[]],vals[3]);
     done();
-  })
+  });
+
+  test("object",(done) => {
+
+    const text = `{
+      "a":true,
+      "b":<tagz>"tag",
+      "bart":null,
+      "smore":[]
+    }`;
+
+    const tree = parse(text);
+
+    const [mode,vals] = tree;
+
+    assert.equal("object",mode);
+
+    assert.deepEqual(["a",["val",true]],vals[0]);
+    assert.deepEqual(["b",["tagval","tagz",["val","tag"]]],vals[1]);
+    assert.deepEqual(["bart",["val",null]],vals[2]);
+    assert.deepEqual(["smore",["array",[]]],vals[3]);
+    done();
+  });
 })
