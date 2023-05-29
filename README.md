@@ -54,7 +54,7 @@ Here is a contrived example
 ```javascript
 const parse_tj = require("teejay");
 
-const tag_function = async (tag,value) => {
+const tag_function = async (tag,value,stack) => {
 	//do things with the tags.
 	//normally you would probably make some kind of lookup table
 
@@ -86,13 +86,42 @@ catch(err) {
 }
 ```
 
-so you can basically see how it works, the tag function gets called with the tag, the value of whatever JSON value comes after the tag, you either callback with a value or an error. 
+so you can basically see how it works, the tag function gets called with the current tag, the value of whatever JSON value comes after the tag, and a stack of other tags that are pending evaluation
+Just return a value o throw an error.
 
 In case it wasn't clear, the values underneath tags don't have to be primatives like strings and numbers and null/true/false type tokens. They can be lists or object that also contain more tags.
 
 # what are the rules for tags?
 
 What you can put in a tag is limited to a single word featuring the letters a-z (lower case only) the digits 0-9 and the character "_" no spaces no special chars (other than _) O made them real dumb to avoid people doing things like putting XML style attributes in their tags. If some true hardcore camelCase dudes start using this and want me to I can add uppercase letters.
+
+# whats with the tag stack?
+
+you might need to use the same name but have it mean different things in different contexts. So like a "barrel" tag might mean something in the context of a cannon than it does in the context of a winery.
+when tags are pending evaluation they stack up so if you need context you can use it.
+
+### tag order:
+
+the order tags will be interpreted is well defined, though I don't know the word for it. I call it "lexical stack." basically when the parser reads a tag, it puts it in a stack and moves to the value afterwards. If it parses the whole value (string,number,array,nothing) without finding another tag. It pops the first tag off the stack and passes it and the value into the tag function. If it finds another tag it pushes that on to the stack and starts over. Once the stack is clear, the next tag on the next json value as it's read will be the next one to show up so for example, in this input the tags will be executed in the order of their names
+
+```
+<last>{
+	"something":{
+		"a_key":<second><first>"key key",
+		"value":<fifth>[<third>"notice how","its not like",<fourth>"the nested keys"] //the third and fourth keys are on the same level, so they go in lexical order
+	}
+}
+```
+
+in this situation the tag function will get called like this: 
+
+```
+tag_function("first","key key",["last","second"]);
+tag_function("third","notice how",["last","fifth"]);
+tag_function("fourth","the nested keys",["last","fifth"]);
+tag_function("fifth",[some val, some val],["last"]);
+tag_function("last",{...the object with the values from before}, []);
+```
 
 # how do I use it advancedly?
 
@@ -109,6 +138,7 @@ You don't have to have anything following a tag. you can have something like thi
 
 the tag function will get called with "global_db_connection" and undefined.
 
+
 ### multi tag:
 You can have more than one tag on the same value like
 
@@ -117,22 +147,6 @@ You can have more than one tag on the same value like
 ```
 
 these tags will get interpreted from the inside out. First your tag function will see "folder" and "~/cat_pictures/". Then it will see "zip" and the results of the previous call. Finially it will see "backup" and the results of the "zip" call.
-
-
-### tag order:
-
-the order tags will be interpreted is well defined, though I don't know the word for it. I call it "lexical stack." basically when the parser reads a tag, it puts it in a stack and moves to the value afterwards. If it parses the whole value (string,number,array,nothing) without finding another tag. It pops the first tag off the stack and passes it and the value into the tag function. If it finds another tag it pushes that on to the stack and starts over. Once the stack is clear, the next tag on the next json value as it's read will be the next one to show up so for example, in this input the tags will be executed in the order of their names
-
-```
-<last>{
-	"something":{
-		"a_key":<second><first>"key key",
-		"value":<fifth>[<third>"notice how","its not like",<fourth>"the nested keys"] //the third and fourth keys are on the same level, so they go in lexical order
-	}
-}
-```
-
-this means you can do some dirty tricks by having tag functions modify state.
 
 # couldn't I use this to make a turing complete programming language
 I'm pretty sure you could but please don't. There are already better programming languages.
