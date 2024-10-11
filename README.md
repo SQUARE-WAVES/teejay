@@ -5,7 +5,7 @@ it's like json but with tags.
 
 # What is this?
 
-TJ, short for "tagged json" is a superset of JSON for storing data with richish semantics. Basically it takes json and lets you put a tag infront of a value to say what it represents. Then when you parse it you get (potentially) something more than just the json types, like your own stuff from your langage (in this case node.js)
+TJ, short for "tagged json" is a superset of JSON for storing data with richish semantics. Basically it takes json and lets you put a tag infront of a value to say what it represents. Then when you parse it you get (potentially) something more than just the json types, but your own stuff from your langage (in this case node.js)
 
 it can look like this:
 ```
@@ -183,10 +183,3 @@ You can have more than one tag on the same value like
 ```
 
 these tags will get interpreted from the inside out. First your tag function will see "folder" and "~/cat_pictures/". Then it will see "zip" and the results of the previous call. Finially it will see "backup" and the results of the "zip" call.
-
-# couldn't I use this to make a turing complete programming language
-I'm pretty sure you could but please don't. There are already better programming languages.
-
-# are you gonna do a languge spec or an RFC or something?
-maybe, if people find this and like it.
-Right now there is a peg.js style grammar in the "grammar" folder, and a little js file that will build a pegjs parser for it. Thats the parser it uses. 
