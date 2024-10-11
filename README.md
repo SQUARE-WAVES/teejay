@@ -74,16 +74,16 @@ Here is a little example:
 const parse_tj = require("teejay");
 
 const tag_function = async (tag,value,stack) => {
-	//do things with the tags.
-	//normally you would probably make some kind of lookup table
+    //do things with the tags.
+    //normally you would probably make some kind of lookup table
 
-	if(tag === "animal" && value==="dog"){
+    if(tag === "animal" && value==="dog") {
         return "a good boy"
 	}
-	else if(tag === "animal"){
-		return "some worthless beast"
+	else if(tag === "animal") {
+        return "some worthless beast"
 	}
-	else{
+	else {
 		throw new Error(`I don't know what to do with the tag "${tag}"`)
 	}
 }
@@ -91,7 +91,7 @@ const tag_function = async (tag,value,stack) => {
 const input = `
 [
     <animal>"dog",
-    <animal>"pangolin",
+    <animal>"catfish",
     "this will just be a string",
     <animal>15,
     true,
