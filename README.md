@@ -1,7 +1,7 @@
 TEEJAY
 ======
 
-it's like json but with tags.
+like JSON but with tags.
 
 # What is this for?
 
@@ -20,7 +20,7 @@ In a lot of projects, both for myself and for work, I would end up using .json f
 }
 ```
 
-These configurations are ok as long as they are small, you can easily read the structure, but there is no semantic information.  Which leaves you with 2 choices:
+These configurations are ok as long as they are small, you can easily read the structure, but there is no semantic information. This leaves you with 2 choices:
 - Just code the way that each key can be interpreted, this is OK but it makes adding new options a pain, you not only have to specify what those options are, but where they might show up in the config.
 - Put extra JSON in that tells you how to interpret the value, which clutters up your configuration and makes it harder to read.
 
@@ -28,7 +28,7 @@ However if you can mark up the values out of band, by using tags to express thin
 
 # how does this solve that problem?
 
-TJ, short for "tagged json" is a superset of JSON, it adds tags before any (but not necessarily every) value, allowing you to interpret the data as richer types when you parse it. It would take that previous configuation and make it look like this:
+TJ, short for "tagged JSON" is a superset of JSON, it adds tags before any (but not necessarily every) value, allowing you to interpret the data as richer types when you parse it. It would take that previous configuration and make it look like this:
 ```
 {
     "database":<postgres_connection_pool>{
@@ -78,7 +78,7 @@ as well if you need a test environment with fake services, just put the fake ser
 # how do I use it?
 
 #### installing
-this is hosted on NPM, or you can just grab this repo and pop it in your node modules folder. 
+this is hosted on NPM, or you can just grab this repository and pop it in your node modules folder. 
 if you want to vendor it, there are only 3 files. main.js lib/parser.js and lib/interp.js those do all the work. 
 
 
@@ -113,14 +113,14 @@ const input = `
     <animal>15,
     true,
     false,
-    "some other random json value"
+    "some other random JSON value"
 ]`
 
 //this input is trouble because our tag function doesn't know what to do with those tags
 const bad_input = `<zip>[ <file>'./dogs/cats/catlist.xml' ]`;
 
 //when you parse the good input you won't have an error, and your results will be:
-//["a good boy","some other creature","this will just be a string","some other creature",true,false,"some other random json value"];
+//["a good boy","some other creature","this will just be a string","some other creature",true,false,"some other random JSON value"];
 
 const values = await parse_tj(input,tag_function);
 
@@ -139,26 +139,26 @@ Just return a value or throw an error. There is more info about working with it 
 
 # is this ready for production?
 
-The short answer is "maybe, but be very careful" I've been using this on my personal projects for a few years with no major issues, but I'm the guy who wrote it, and those personal sites don't see tons of traffic or have people trying to hack them or anything. I would advise against something that takes TJ data from untrusted outside sources unless you are very careful with your tag function. It's also possible that there are errors in the parser which could lead to denial of service attacks or worse things. This is a personal project and just hasn't really been "battle tested" enough for me to tell you it's super robust. Anyways if you decide to use it for something that would be neat and I'd be happy to help with issues.
+The short answer is "maybe, but be very careful" I've been using this on my personal projects for a few years with no major issues, but I'm the guy who wrote it, and those personal sites don't see tons of traffic or have people trying to hack them or anything. I would advise against something that takes TJ data from un-trusted outside sources unless you are very careful with your tag function. It's also possible that there are errors in the parser which could lead to denial of service attacks or worse things. This is a personal project and just hasn't really been "battle tested" enough for me to tell you it's super robust. Anyways if you decide to use it for something that would be neat and I'd be happy to help with issues.
 
 # tips and tricks!
 
 # about the tag stack
 
-the tag stack lets you have the same tag be interpreted in different ways depending on context. For example "key" might mean one kind of thing for an api client, and another thing for a gearshaft.
+the tag stack lets you have the same tag be interpreted in different ways depending on context. For example "key" might mean one kind of thing for an api client, and another thing for a gear shaft.
 By adding this context, tag functions can more easily be built up by composing smaller tag functions made in isolation.
 
 However you don't ever need to do this, for simple enough things just having a flat set of tags and ignoring the stack is fine.
 
 
-# what kinds of charachters are allowed in tags?
+# what kinds of characters are allowed in tags?
 
 What you can put in a tag is limited to a single word featuring the letters a-z (lower case only) the digits 0-9 and the character "_" no spaces no special chars (other than _) 
 I made them real simple because I think the best way to make stuff like this work is to compose tags rather than have really complicated tags.
 
 ### tag order:
 
-the order tags will be interpreted is well defined, though I don't know the word for it. I call it "lexical stack." basically when the parser reads a tag, it puts it in a stack and moves to the value afterwards. If it parses the whole value (string,number,array,null,nothing) without finding another tag. It pops the first tag off the stack and passes it and the value into the tag function. If it finds another tag it pushes that on to the stack and starts over. Once the stack is clear, the next tag on the next json value as it's read will be the next one to show up so for example, in this input the tags will be executed in the order of their names
+the order tags will be interpreted is well defined, though I don't know the word for it. I call it "lexical stack." basically when the parser reads a tag, it puts it in a stack and moves to the value afterwards. If it parses the whole value (string,number,array,null,nothing) without finding another tag. It pops the first tag off the stack and passes it and the value into the tag function. If it finds another tag it pushes that on to the stack and starts over. Once the stack is clear, the next tag on the next JSON value as it's read will be the next one to show up so for example, in this input the tags will be executed in the order of their names
 
 ```
 <last>{
@@ -194,7 +194,7 @@ You don't have to have anything following a tag. you can have something like thi
 ```
 
 the tag function will get called with "global_db_connection" and undefined.
-Remeber "null" is a valid json value! so something like
+Remeber "null" is a valid JSON value! so something like
 ```
 <global_db_connection>null
 ```
